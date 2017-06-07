@@ -1,0 +1,63 @@
+{
+  "playlist": [{
+    "title": "Stupid Thing",
+    "stream": "https://www.youtube.com/watch?v=sTm7aZE6u6w",
+    "sections": [
+      [16, "verse 1"],
+      [43, "chorus 2"],
+      [65, "verse 2"],
+      [93, "chorus 2"],
+      [117, "solo 1"],
+      [145, "verse 3"],
+      [172, "chorus 3"],
+      [199, "solo outro"]
+    ]
+  }, {
+    "title": "Freeway",
+    "stream": "https://www.youtube.com/watch?v=TQF5CXV9cos",
+    "sections": [
+      [12, "chorus"],
+      [16, "next bit"]
+    ]
+  }, {
+    "title": "Pavlov's Bell",
+    "stream": "https://www.youtube.com/watch?v=Dr08SIHELV8",
+    "sections": [
+      [11, "verse 1"],
+      [45, "chorus 1"],
+      [68, "verse 2"],
+      [101, "chorus 2"],
+      [125, "solo"],
+      [146, "verse 3"],
+      [180, "chorus 3a"],
+      [200, "chorus 3b"],
+      [225, "solo outro"]
+    ]
+  }, {
+    "title": "Humpty Dumpty",
+    "stream": "https://www.youtube.com/watch?v=ZjDr8lfLZZE",
+    "sections": [
+      [12, "chorus"],
+      [220, "finish"]
+    ]
+  }, {
+    "title": "Deathly (Live)",
+    "stream": "https://www.youtube.com/watch?v=tQ6XqSU4VP4",
+    "sections": [
+      [30, "prechorus 1"],
+      [58, "chorus 1"],
+      [80, "verse 2"]
+    ]
+  }, {
+    "title": "Red Vines",
+    "stream": "https://www.youtube.com/watch?v=-bD0gtvfqoM",
+    "sections": [
+      [11, "verse 1"],
+      [48, "chorus 1"],
+      [70, "verse 2"],
+      [107, "chorus 2"],
+      [130, "bridge"],
+      [151, "chorus 3"]
+    ]
+  }]
+}
