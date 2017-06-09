@@ -376,18 +376,19 @@ function! s:renderInterface(indexed_annotation, state) abort
     call add(ui, "")
     call add(ui, "------Bindings------")
 
+    call add(ui, "<Up>: volume up")
+    call add(ui, "<Down>: volume down")
+    call add(ui, "<Space>: toggle play/pause")
+    call add(ui, "<Left>: previous VLC playlist item in selection")
+    call add(ui, "<Right>: next VLC playlist item in selection")
     call add(ui, "p (normal mode): play section under cursor till end of its stream")
     call add(ui, "p (linewise visual mode): loop highlighted section(s)")
     call add(ui, "ri: increase rate")
     call add(ui, "rd: decrease rate")
     call add(ui, "rn: normal rate")
-    call add(ui, "<Up>: volume up")
-    call add(ui, "<Down>: volume down")
     call add(ui, "u: show seconds played of stream")
     call add(ui, "o: toggle loop")
-    call add(ui, "<Left>: previous VLC playlist item")
-    call add(ui, "<Right>: next VLC playlist item")
-    call add(ui, "q: close buffer")
+    call add(ui, "q: close VlcDrill buffer")
 
     "paint to buffer
     call s:openInterface()
@@ -747,8 +748,7 @@ augroup DrillAug
 augroup END
 
 function! s:VlcDrillHandleAnnotation() abort
-    echom g:vlcdrill#annotation#path
-    while !exists("g:vlcdrill#annotation#path") || empty(glob(g:vlcdrill#annotation#path))
+    while !exists("g:vlcdrill#annotation#path") || empty(expand(g:vlcdrill#annotation#path))
         let g:vlcdrill#annotation#path = input("Annotation JSON not found. Enter path for annotation JSON: ", "", "file")
     endwhile
 endfunction
@@ -773,7 +773,7 @@ function! vlcdrill#VlcDrillShow() abort
     endwhile
     call s:VlcDrillHandleAnnotation()
     if !s:drill.hasLoadedAnnotation()
-        call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+        call s:drill.loadAnnotation(expand(g:vlcdrill#annotation#path))
     endif
     call s:drill.renderInterface()
 endfunction
@@ -781,11 +781,11 @@ endfunction
 function! vlcdrill#VlcDrillLoadAnnotation() abort
     let annotation_path = input("Enter path for annotation JSON (leave empty to reload current annotation): ", "", "file")
     if strlen(annotation_path) ==# 0
-        call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+        call s:drill.loadAnnotation(expand(g:vlcdrill#annotation#path))
     else
         let g:vlcdrill#annotation#path = annotation_path
         call s:VlcDrillHandleAnnotation()
-        call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+        call s:drill.loadAnnotation(expand(g:vlcdrill#annotation#path))
     endif
     call s:drill.renderInterface()
 endfunction
