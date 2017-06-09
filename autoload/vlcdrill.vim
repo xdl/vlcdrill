@@ -779,8 +779,13 @@ function! vlcdrill#VlcDrillShow() abort
 endfunction
 
 function! vlcdrill#VlcDrillLoadAnnotation() abort
-    let g:vlcdrill#annotation#path = input("Enter path for annotation JSON: ", "", "file")
-    call s:VlcDrillHandleAnnotation()
-    call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+    let annotation_path = input("Enter path for annotation JSON (leave empty to reload current annotation): ", "", "file")
+    if strlen(annotation_path) ==# 0
+        call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+    else
+        let g:vlcdrill#annotation#path = annotation_path
+        call s:VlcDrillHandleAnnotation()
+        call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
+    endif
     call s:drill.renderInterface()
 endfunction
