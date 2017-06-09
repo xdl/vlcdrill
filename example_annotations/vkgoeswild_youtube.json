@@ -1,0 +1,24 @@
+{
+  "playlist": [{
+    "title": "Sweet Child o' Mine",
+    "stream": "https://www.youtube.com/watch?v=ff8UwvPK0G4"
+  }, {
+    "title": "The Sound of Silence",
+    "stream": "https://www.youtube.com/watch?v=qwc-PBgh8-w"
+  }, {
+    "title": "Comfortably Numb",
+    "stream": "https://www.youtube.com/watch?v=sq1TTCi9RVA"
+  }, {
+    "title": "Free Bird",
+    "stream": "https://www.youtube.com/watch?v=pclSoQFVUo4"
+  }, {
+    "title": "Fade to Black",
+    "stream": "https://www.youtube.com/watch?v=1FH6NSPyj18"
+  }, {
+    "title": "I'd Do Anything For Love (But I Won't Do That)",
+    "stream": "https://www.youtube.com/watch?v=YYSFDjdchIg"
+  }, {
+    "title": "November Rain",
+    "stream": "https://www.youtube.com/watch?v=FhbeNEtkgDs"
+  }]
+}
