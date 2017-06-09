@@ -2,6 +2,8 @@
 
 Vim interface for controlling VLC over telnet using the `rc` interface.
 
+![Preview](assets/preview.gif)
+
 ## Installation
 
 ### Pathogen
