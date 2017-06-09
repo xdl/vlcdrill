@@ -16,8 +16,13 @@
     "title": "Freeway",
     "stream": "https://www.youtube.com/watch?v=TQF5CXV9cos",
     "sections": [
-      [12, "chorus"],
-      [16, "next bit"]
+      [12, "verse 1"],
+      [50, "prechorus 1"],
+      [60, "chorus 1"],
+      [80, "verse 2"],
+      [118, "prechorus 2"],
+      [128, "chorus 2"],
+      [149, "outro"]
     ]
   }, {
     "title": "Pavlov's Bell",
@@ -37,8 +42,13 @@
     "title": "Humpty Dumpty",
     "stream": "https://www.youtube.com/watch?v=ZjDr8lfLZZE",
     "sections": [
-      [12, "chorus"],
-      [220, "finish"]
+      [12, "verse 1"],
+      [38, "chorus 1"],
+      [67, "verse 2"],
+      [92, "chorus 2"],
+      [121, "bridge"],
+      [160, "chorus 3"],
+      [189, "outro"]
     ]
   }, {
     "title": "Deathly (Live)",

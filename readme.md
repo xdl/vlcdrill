@@ -4,10 +4,12 @@ Vim interface for controlling VLC over telnet using the `rc` interface.
 
 ## Installation
 
-With Pathogen:
+### Pathogen
 
     cd ~/.vim/bundle
     git clone git://github.com/xdl/vlcdrill.git
+
+And then `:call pathogen#helptags()` to generate the helptags.
 
 ## Annotation Format
 
@@ -60,6 +62,21 @@ Where `<Section>` can be:
 * `[start_time <int>, description <string>]`
 
 See the `example_annotations/` directory for more examples (The `aimee_mann_youtube.json` is loaded by default, if one isn't set in `g:vlcdrill#annotation#path`)
+
+## Bindings
+
+* `p` (normal mode): play section under cursor till end of its stream
+* `p` (linewise visual mode): loop highlighted section(s)
+* `ri`: increase rate
+* `rd`: decrease rate
+* `rn`: normal rate
+* `<Up>`: volume up
+* `<Down>`: volume down
+* `u`: show seconds played of stream
+* `o`: toggle loop
+* `<Left>`: previous VLC playlist item
+* `<Right>`: next VLC playlist item
+* `q`: close VlcDrill buffer
 
 ## Customisation
 

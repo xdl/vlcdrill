@@ -1,0 +1,10 @@
+*vlcdrill.txt*  Plugin for interfacing with VLC
+
+Author:  Tim Pope <https://xiaodi.li/>
+License: MIT (see |license|)
+
+This plugin is only available if 'compatible' is not set.
+
+INTRODUCTION                                    *vlcdrill*
+
+MAPPINGS                                        *vlc-mappings*
