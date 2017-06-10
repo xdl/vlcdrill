@@ -113,9 +113,6 @@ endfunction
 function! s:startTelnetServer(vlc_bin, port, password, log_location) abort
     let pushed_shellcmdflags = &shellcmdflag
     set shellcmdflag=-ic
-    " http://stackoverflow.com/questions/2292847/how-to-silence-output-in-a-bash-script
-    "silent execute "!" . a:vlc_bin . " -I telnet --telnet-password " . a:password . " > " . a:log_location . " 2>&1 &"
-    "redraw!
     call system(a:vlc_bin . " -I telnet --telnet-password " . a:password . " > " . a:log_location . " 2>&1 &")
     let &shellcmdflag=pushed_shellcmdflags
 endfunction
@@ -575,8 +572,8 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
             endif
         else
             call s:ExecuteSilently(self.tcb.build('rate ' . string(self.state.rate/10.0)), self.debug_flag)
+            call s:renderInterface(self.indexed_annotation, self.getState())
         endif
-        call s:renderInterface(self.indexed_annotation, self.getState())
     endfunction
 
     "interface
