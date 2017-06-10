@@ -26,7 +26,7 @@ endif
 "70 → 1:30 etc.
 function! s:SecondsToDisplay(seconds)
     let internal = {}
-    function internal.padLeft(digit) dict
+    function internal.padLeft(digit)
         if a:digit >= 10
             return a:digit
         else
@@ -123,8 +123,10 @@ endfunction
 "curry off the port and password
 function! s:TelnetCommandBuilder(port, password) abort
     let builder = {}
-    function builder.build(rc_command) dict closure
-        return "echo -e '" . a:password . "\\n" . a:rc_command . "' | nc localhost " . a:port
+    let builder.port = a:port
+    let builder.password = a:password
+    function builder.build(rc_command)
+        return "echo -e '" . self.password . "\\n" . a:rc_command . "' | nc localhost " . self.port
     endfunction
     return builder
 endfunction
@@ -209,26 +211,27 @@ endfunction
 "where sections = <int> | [<int>, <string>]
 "where type = song | section
 function! s:renderInterface(indexed_annotation, state) abort
-    let by_lines = a:indexed_annotation.by_lines
-    let by_song_id = a:indexed_annotation.by_song_id
-    "internal functions
+    "internal state/functions
     let internal = {}
-    function internal.shouldRenderInPlaylist(line_num) dict closure
-        if a:state.linewise_mode ==# 1
-            if a:line_num >= a:state.line_selected[0] && a:line_num <= a:state.line_selected[1]
+    let internal.by_lines = a:indexed_annotation.by_lines
+    let internal.by_song_id = a:indexed_annotation.by_song_id
+    let internal.state = a:state
+    function internal.shouldRenderInPlaylist(line_num)
+        if self.state.linewise_mode ==# 1
+            if a:line_num >= self.state.line_selected[0] && a:line_num <= self.state.line_selected[1]
                 return 1
             else
                 return 0
             endif
         else "regular play mode
-            let line = by_lines[a:line_num]
-            if has_key(a:state, 'line_selected')
-                let current_song_id = by_lines[a:state.line_selected].song_id
-                let current_song_type = by_lines[a:state.line_selected].type
+            let line = self.by_lines[a:line_num]
+            if has_key(self.state, 'line_selected')
+                let current_song_id = self.by_lines[self.state.line_selected].song_id
+                let current_song_type = self.by_lines[self.state.line_selected].type
                 if current_song_type ==# 'song' && line.song_id ==# current_song_id
                     return 1
-                "elseif current_song_type ==# 'section' && a:line_num ==# a:state.line_selected
-                elseif current_song_type ==# 'section' && line.song_id ==# current_song_id && a:line_num >= a:state.line_selected
+                "elseif current_song_type ==# 'section' && a:line_num ==# self.state.line_selected
+                elseif current_song_type ==# 'section' && line.song_id ==# current_song_id && a:line_num >= self.state.line_selected
                     return 1
                 else
                     return 0
@@ -238,21 +241,21 @@ function! s:renderInterface(indexed_annotation, state) abort
             endif
         endif
     endfunction
-    function internal.shouldRenderLoop(line_num) dict closure
-        if a:state.linewise_mode ==# 1
-            if a:line_num >= a:state.line_selected[0] && a:line_num <= a:state.line_selected[1]
+    function internal.shouldRenderLoop(line_num)
+        if self.state.linewise_mode ==# 1
+            if a:line_num >= self.state.line_selected[0] && a:line_num <= self.state.line_selected[1]
                 return 1
             else
                 return 0
             endif
         else "regular play mode
-            let line = by_lines[a:line_num]
-            if has_key(a:state, 'line_selected')
-                let current_song_id = by_lines[a:state.line_selected].song_id
-                let current_song_type = by_lines[a:state.line_selected].type
-                if current_song_type ==# 'song' && line.song_id ==# current_song_id && a:state.loop ==# 1
+            let line = self.by_lines[a:line_num]
+            if has_key(self.state, 'line_selected')
+                let current_song_id = self.by_lines[self.state.line_selected].song_id
+                let current_song_type = self.by_lines[self.state.line_selected].type
+                if current_song_type ==# 'song' && line.song_id ==# current_song_id && self.state.loop ==# 1
                     return 1
-                elseif current_song_type ==# 'section' && line.song_id ==# current_song_id && a:line_num >= a:state.line_selected && a:state.loop ==# 1
+                elseif current_song_type ==# 'section' && line.song_id ==# current_song_id && a:line_num >= self.state.line_selected && self.state.loop ==# 1
                     return 1
                 else
                     return 0
@@ -262,16 +265,16 @@ function! s:renderInterface(indexed_annotation, state) abort
             endif
         endif
     endfunction
-    function internal.shouldRenderPlayPauseIndicator(line_num) dict closure
-        if has_key(a:state, 'line_selected')
-            if type(a:state.line_selected) ==# v:t_list
-                if a:line_num ==# a:state.line_selected[0]
+    function internal.shouldRenderPlayPauseIndicator(line_num)
+        if has_key(self.state, 'line_selected')
+            if type(self.state.line_selected) ==# v:t_list
+                if a:line_num ==# self.state.line_selected[0]
                     return 1
                 else
                     return 0
                 endif
-            elseif type(a:state.line_selected) ==# v:t_number
-                if a:line_num ==# a:state.line_selected
+            elseif type(self.state.line_selected) ==# v:t_number
+                if a:line_num ==# self.state.line_selected
                     return 1
                 else
                     return 0
@@ -283,7 +286,7 @@ function! s:renderInterface(indexed_annotation, state) abort
             return 0
         endif
     endfunction
-    function internal.generateLeftPlaylistIndicatorFragment(line_num) dict
+    function internal.generateLeftPlaylistIndicatorFragment(line_num)
         let template = ''
         if self.shouldRenderInPlaylist(a:line_num)
             let template = template . '▌'
@@ -298,35 +301,35 @@ function! s:renderInterface(indexed_annotation, state) abort
         let template = template . ' '
         return template
     endfunction
-    function internal.generatePlayPauseFragment() dict closure
-        if a:state.play_state ==# 'playing'
+    function internal.generatePlayPauseFragment()
+        if self.state.play_state ==# 'playing'
             return ' ▶'
-        elseif a:state.play_state ==# 'paused'
+        elseif self.state.play_state ==# 'paused'
             return ' ⏸'
         else
             return ''
         endif
     endfunction
-    function internal.SongTemplate(line_num) dict closure
-        let line = by_lines[a:line_num]
-        let song = by_song_id[line.song_id]
-        let template = internal.generateLeftPlaylistIndicatorFragment(a:line_num)
+    function internal.SongTemplate(line_num)
+        let line = self.by_lines[a:line_num]
+        let song = self.by_song_id[line.song_id]
+        let template = self.generateLeftPlaylistIndicatorFragment(a:line_num)
         let template = template . song.title . "  " . s:SecondsToDisplay(line.start_time)
         if self.shouldRenderPlayPauseIndicator(a:line_num)
-            let template = template . internal.generatePlayPauseFragment()
+            let template = template . self.generatePlayPauseFragment()
         endif
         return template
     endfunction
-    function internal.SectionTemplate(line_num) dict closure
-        let line = by_lines[a:line_num]
-        let template = internal.generateLeftPlaylistIndicatorFragment(a:line_num)
+    function internal.SectionTemplate(line_num)
+        let line = self.by_lines[a:line_num]
+        let template = self.generateLeftPlaylistIndicatorFragment(a:line_num)
         if has_key(line, 'description')
             let template = template . "  " . line.description . "  " . s:SecondsToDisplay(line.start_time)
         else
             let template = template . "  " . s:SecondsToDisplay(line.start_time)
         endif
-        if internal.shouldRenderPlayPauseIndicator(a:line_num)
-            let template = template . internal.generatePlayPauseFragment()
+        if self.shouldRenderPlayPauseIndicator(a:line_num)
+            let template = template . self.generatePlayPauseFragment()
         endif
         return template
     endfunction
@@ -416,244 +419,248 @@ function! s:ExecuteSilently(command, debug_flag)
 endfunction
 
 function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_flag) abort
-
-    let annotation_loaded = 0
-    let indexed_annotation = {} "to be set on loadAnnotation
+    
+    "internal state/functions
+    let internal = {}
+    let internal.indexed_annotation = {} "to be set on loadAnnotation
+    let internal.tcb = s:TelnetCommandBuilder(a:telnet_port, a:telnet_password)
+    let internal.annotation_loaded = 0
+    let internal.telnet_port = a:telnet_port
+    let internal.telnet_password = a:telnet_password
+    let internal.log_location = a:log_location
+    let internal.debug_flag = a:debug_flag
     "line_selected <int>
     "current_time [current_time <int>, total_time <int>]
-    let state = {
-                \'loop': 0,
-                \'linewise_mode': 0,
-                \'rate': 10
-                \}
-    let tcb = s:TelnetCommandBuilder(a:telnet_port, a:telnet_password)
-    
-    "internal functions
-    let internal = {}
-    function internal.getState() dict closure
-        if s:isTelnetServerStarted(a:telnet_port) ==# 0
-            return state
+    let internal.state = {
+        \'loop': 0,
+        \'linewise_mode': 0,
+        \'rate': 10
+        \}
+    function internal.getState()
+        if s:isTelnetServerStarted(self.telnet_port) ==# 0
+            return self.state
         else
-            let raw_status = system(tcb.build('status'))
+            let raw_status = system(self.tcb.build('status'))
             let [volume, play_state] = s:matchRawStatus(raw_status)
-            let title = s:matchRawRc(system(tcb.build('get_title')))
+            let title = s:matchRawRc(system(self.tcb.build('get_title')))
             let state_for_ui = {
-                        \'loop': state.loop,
-                        \'rate': state.rate,
-                        \'linewise_mode': state.linewise_mode,
-                        \'volume': volume,
-                        \'play_state': play_state,
-                        \'title': title
-                        \}
-            if has_key(state, 'line_selected')
-                let state_for_ui.line_selected = state.line_selected
+                \'loop': self.state.loop,
+                \'rate': self.state.rate,
+                \'linewise_mode': self.state.linewise_mode,
+                \'volume': volume,
+                \'play_state': play_state,
+                \'title': title
+                \}
+            if has_key(self.state, 'line_selected')
+                let state_for_ui.line_selected = self.state.line_selected
             endif
-            if has_key(state, 'current_time')
-                let state_for_ui.current_time = state.current_time
+            if has_key(self.state, 'current_time')
+                let state_for_ui.current_time = self.state.current_time
             endif
             return state_for_ui
         endif
     endfunction
-    function internal.interpretLinesToPlay(first_line, last_line, currently_visual) dict closure
+    function internal.interpretLinesToPlay(first_line, last_line, currently_visual)
         if s:IsLinewiseSelection(a:currently_visual) "visual linemode check
-            if has_key(indexed_annotation.by_lines, a:first_line) && has_key(indexed_annotation.by_lines, a:last_line)
-                let state.line_selected = [a:first_line, a:last_line]
+            if has_key(self.indexed_annotation.by_lines, a:first_line) && has_key(self.indexed_annotation.by_lines, a:last_line)
+                let self.state.line_selected = [a:first_line, a:last_line]
                 " checking boundaries on the song
                 if (a:first_line ==# a:last_line) "looping one section/song
-                    let target = indexed_annotation.by_lines[a:first_line]
-                    let song_stream = indexed_annotation.by_song_id[target.song_id].stream
+                    let target = self.indexed_annotation.by_lines[self.first_line]
+                    let song_stream = self.indexed_annotation.by_song_id[target.song_id].stream
                     let start_time = target.start_time
                     let next_line = a:first_line + 1
-                    if has_key(indexed_annotation.by_lines, next_line) "checking if stop-time needs bounding
-                        let next_target = indexed_annotation.by_lines[next_line]
+                    if has_key(self.indexed_annotation.by_lines, next_line) "checking if stop-time needs bounding
+                        let next_target = self.indexed_annotation.by_lines[next_line]
                         if (next_target.song_id ==# target.song_id) "bounded by a subsequent section
                             let finish_time = next_target.start_time
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :stop-time=' . finish_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                            let state.loop = 1
+                            call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :stop-time=' . finish_time . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                            let self.state.loop = 1
                         else "different song next
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                            let state.loop = 1
+                            call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                            let self.state.loop = 1
                         endif
                     else "last section/song in the playlist
-                        call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                        let state.loop = 1
+                        call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                        call s:ExecuteSilently(self.tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
+                        call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                        let self.state.loop = 1
                     endif
                 else "looping multiple sections/songs
                     let songs = []
-                    let current_song = indexed_annotation.by_lines[a:first_line]
+                    let current_song = self.indexed_annotation.by_lines[a:first_line]
                     let current_start_time = current_song.start_time
                     for i in range(a:first_line + 1, a:last_line)
-                        let target = indexed_annotation.by_lines[i]
+                        let target = self.indexed_annotation.by_lines[i]
                         if current_song.song_id !=# target.song_id
                             call add(songs, current_song)
                             let current_song = target
                         endif
                     endfor
                     call add(songs, current_song)
-                    let song_stream_commands = [indexed_annotation.by_song_id[songs[0].song_id].stream . ' :start-time=' . songs[0].start_time]
+                    let song_stream_commands = [self.indexed_annotation.by_song_id[songs[0].song_id].stream . ' :start-time=' . songs[0].start_time]
                     for song in songs[1:]
-                        call add(song_stream_commands, indexed_annotation.by_song_id[song.song_id].stream)
+                        call add(song_stream_commands, self.indexed_annotation.by_song_id[song.song_id].stream)
                     endfor
                     let next_line = a:last_line + 1
-                    if has_key(indexed_annotation.by_lines, next_line) "checking if stop-time needs bounding
-                        let next_target = indexed_annotation.by_lines[next_line]
+                    if has_key(self.indexed_annotation.by_lines, next_line) "checking if stop-time needs bounding
+                        let next_target = self.indexed_annotation.by_lines[next_line]
                         if (next_target.song_id ==# target.song_id) "bounded by a subsequent section
                             let finish_time = next_target.start_time
                             let song_stream_commands[-1] = song_stream_commands[-1] . ' :stop-time=' . finish_time
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
                             for stream_command in song_stream_commands[1:]
-                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                                call s:ExecuteSilently(self.tcb.build('enqueue ' . stream_command . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
                             endfor
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                            let state.loop = 1
+                            call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                            let self.state.loop = 1
                         else "different song next
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
                             for stream_command in song_stream_commands[1:]
-                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command), a:debug_flag)
+                                call s:ExecuteSilently(self.tcb.build('enqueue ' . stream_command), self.debug_flag)
                             endfor
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                            let state.loop = 1
+                            call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                            let self.state.loop = 1
                         endif
                     else "last section/song in the playlist
-                        call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                        call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                        call s:ExecuteSilently(self.tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
                         for stream_command in song_stream_commands[1:]
-                            call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(self.tcb.build('enqueue ' . stream_command . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
                         endfor
-                        call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
-                        let state.loop = 1
+                        call s:ExecuteSilently(self.tcb.build('loop on'), self.debug_flag)
+                        let self.state.loop = 1
                     endif
                 endif
-                let state.linewise_mode = 1
+                let self.state.linewise_mode = 1
             endif
         else "regular play mode
             if a:first_line ==# a:last_line "play single song/section
-                if has_key(indexed_annotation.by_lines, a:first_line)
+                if has_key(self.indexed_annotation.by_lines, a:first_line)
                     "update latest line played
-                    let state.line_selected = a:first_line
-                    let target = indexed_annotation.by_lines[a:first_line]
-                    let song_stream = indexed_annotation.by_song_id[target.song_id].stream
+                    let self.state.line_selected = a:first_line
+                    let target = self.indexed_annotation.by_lines[a:first_line]
+                    let song_stream = self.indexed_annotation.by_song_id[target.song_id].stream
                     let start_time = target.start_time
-                    call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                    call s:ExecuteSilently(tcb.build('add ' . song_stream . ' ' . ':start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                    if state.loop ==# 1
-                        call s:ExecuteSilently(tcb.build('loop off'), a:debug_flag)
-                        let state.loop = 0
+                    call s:ExecuteSilently(self.tcb.build('clear'), self.debug_flag)
+                    call s:ExecuteSilently(self.tcb.build('add ' . song_stream . ' ' . ':start-time=' . start_time . ' :rate=' . string(self.state.rate/10.0)), self.debug_flag)
+                    if self.state.loop ==# 1
+                        call s:ExecuteSilently(self.tcb.build('loop off'), self.debug_flag)
+                        let self.state.loop = 0
                     endif
-                    let state.linewise_mode = 0
+                    let self.state.linewise_mode = 0
                 endif
             endif
         endif
-        call s:ExecuteSilently(tcb.build('play'), a:debug_flag) "makes sure play status is properly set
-        call s:renderInterface(indexed_annotation, self.getState())
+        call s:ExecuteSilently(self.tcb.build('play'), self.debug_flag) "makes sure play status is properly set
+        call s:renderInterface(self.indexed_annotation, self.getState())
     endfunction
-    function internal.handleRateChange() dict closure
+    function internal.handleRateChange()
         "Waiting for this ticket to be resolved: https://trac.videolan.org/vlc/ticket/18375
         "For now, reload the playlist if either:
         "1. Playing normally, but on loop
         "2. Playing linewise, regardless of any subsequent loop toggle
-        let linewise_mode = type(state.line_selected) ==# v:t_list
-        if state.loop ==# 1 || linewise_mode
+        let linewise_mode = type(self.state.line_selected) ==# v:t_list
+        if self.state.loop ==# 1 || linewise_mode
             if linewise_mode
-                call self.interpretLinesToPlay(state.line_selected[0], state.line_selected[1], 1)
+                call self.interpretLinesToPlay(self.state.line_selected[0], self.state.line_selected[1], 1)
             else
-                call self.interpretLinesToPlay(state.line_selected, state.line_selected, 0)
+                call self.interpretLinesToPlay(self.state.line_selected, self.state.line_selected, 0)
             endif
         else
-            call s:ExecuteSilently(tcb.build('rate ' . string(state.rate/10.0)), a:debug_flag)
+            call s:ExecuteSilently(self.tcb.build('rate ' . string(self.state.rate/10.0)), self.debug_flag)
         endif
-        call s:renderInterface(indexed_annotation, self.getState())
+        call s:renderInterface(self.indexed_annotation, self.getState())
     endfunction
 
     "interface
     let drill = {}
-    function drill.loadAnnotation(annotation_path) dict closure abort
+    let drill.internal = internal
+    function drill.loadAnnotation(annotation_path) abort
         let annotation_spec = json_decode(join(readfile(a:annotation_path)))
-        let indexed_annotation = s:indexAnnotation(annotation_spec)
-        if s:isTelnetServerStarted(a:telnet_port) ==# 0
-            call s:startTelnetServer(g:vlcdrill#bin#path, a:telnet_port, a:telnet_password, a:log_location)
+        let self.internal.indexed_annotation = s:indexAnnotation(annotation_spec)
+        if s:isTelnetServerStarted(self.internal.telnet_port) ==# 0
+            call s:startTelnetServer(g:vlcdrill#bin#path, self.internal.telnet_port, self.internal.telnet_password, self.internal.log_location)
         else
-            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-            call s:ExecuteSilently(tcb.build('loop off'), a:debug_flag)
-            call s:ExecuteSilently(tcb.build('rate 1'), a:debug_flag)
+            call s:ExecuteSilently(self.internal.tcb.build('clear'), self.internal.debug_flag)
+            call s:ExecuteSilently(self.internal.tcb.build('loop off'), self.internal.debug_flag)
+            call s:ExecuteSilently(self.internal.tcb.build('rate 1'), self.internal.debug_flag)
         endif
-        let annotation_loaded = 1
+        let self.internal.annotation_loaded = 1
     endfunction
-    function drill.hasLoadedAnnotation() dict closure
-        return annotation_loaded
+    function drill.hasLoadedAnnotation()
+        return self.internal.annotation_loaded
     endfunction
-    function drill.interpretLinesToPlay(first_line, last_line, currently_visual) dict closure
-        call internal.interpretLinesToPlay(a:first_line, a:last_line, a:currently_visual)
+    function drill.interpretLinesToPlay(first_line, last_line, currently_visual)
+        call self.internal.interpretLinesToPlay(a:first_line, a:last_line, a:currently_visual)
     endfunction
-    function drill.pause() dict closure
-        call s:ExecuteSilently(tcb.build('pause'), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.pause()
+        call s:ExecuteSilently(self.internal.tcb.build('pause'), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.toggleLoop() dict closure
-        if state.loop ==# 0
-            let state.loop = 1
+    function drill.toggleLoop()
+        if self.internal.state.loop ==# 0
+            let self.internal.state.loop = 1
             let command = 'on'
         else
-            let state.loop = 0
+            let self.internal.state.loop = 0
             let command = ' off'
         endif
-        call s:ExecuteSilently(tcb.build('loop ' . command), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+        call s:ExecuteSilently(self.internal.tcb.build('loop ' . command), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.volumeUp() dict closure
-        call s:ExecuteSilently(tcb.build('volup'), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.volumeUp()
+        call s:ExecuteSilently(self.internal.tcb.build('volup'), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.volumeDown() dict closure
-        call s:ExecuteSilently(tcb.build('voldown'), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.volumeDown()
+        call s:ExecuteSilently(self.internal.tcb.build('voldown'), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.debug() dict closure
+    function drill.debug()
         return {
-                    \'indexed': indexed_annotation,
-                    \'state': state
-                    \}
+            \'indexed': self.internal.indexed_annotation,
+            \'state': self.internal.state
+            \}
     endfunction
-    function drill.renderInterface() dict closure
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.renderInterface()
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.rateIncrease() dict closure
-        let state.rate = state.rate + 1
-        call internal.handleRateChange()
+    function drill.rateIncrease()
+        let self.internal.state.rate = self.internal.state.rate + 1
+        call self.internal.handleRateChange()
     endfunction
-    function drill.rateDecrease() dict closure
-        let state.rate = state.rate - 1
-        call internal.handleRateChange()
+    function drill.rateDecrease()
+        let self.internal.state.rate = self.internal.state.rate - 1
+        call self.internal.handleRateChange()
     endfunction
-    function drill.rateNormal() dict closure
-        let state.rate = 10
-        call internal.handleRateChange()
+    function drill.rateNormal()
+        let self.internal.state.rate = 10
+        call self.internal.handleRateChange()
     endfunction
-    function drill.getCurrentTime() dict closure
-        let current_time = s:matchRawRc(system(tcb.build('get_time')))
-        let total_time = s:matchRawRc(system(tcb.build('get_length')))
-        let state.current_time = [current_time, total_time]
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.getCurrentTime()
+        let current_time = s:matchRawRc(system(self.internal.tcb.build('get_time')))
+        let total_time = s:matchRawRc(system(self.internal.tcb.build('get_length')))
+        let self.internal.state.current_time = [current_time, total_time]
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.cleanup() dict closure
-        call s:ExecuteSilently(tcb.build('shutdown'), a:debug_flag)
-        silent execute "!rm " . a:log_location
+    function drill.cleanup()
+        call s:ExecuteSilently(self.internal.tcb.build('shutdown'), self.internal.debug_flag)
+        silent execute "!rm " . self.internal.log_location
     endfunction
-    function drill.prev() dict closure
-        call s:ExecuteSilently(tcb.build('prev'), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.prev()
+        call s:ExecuteSilently(self.internal.tcb.build('prev'), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
-    function drill.next() dict closure
-        call s:ExecuteSilently(tcb.build('next'), a:debug_flag)
-        call s:renderInterface(indexed_annotation, internal.getState())
+    function drill.next()
+        call s:ExecuteSilently(self.internal.tcb.build('next'), self.internal.debug_flag)
+        call s:renderInterface(self.internal.indexed_annotation, self.internal.getState())
     endfunction
     return drill
 endfunction
