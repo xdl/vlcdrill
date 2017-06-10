@@ -153,19 +153,19 @@ function! s:indexAnnotation(annotation) abort
                     \ 'start_time': 0
                     \}
         let line_num = line_num + 1
-        if type(song) ==# v:t_string
+        if type(song) ==# type("")
             let indexed.by_song_id[song_id] = {
                         \ 'title': song,
                         \ 'stream': song
                         \}
-        elseif type(song) ==# v:t_dict
+        elseif type(song) ==# type({})
             let indexed.by_song_id[song_id] = {
                         \ 'title': song.title,
                         \ 'stream': song.stream
                         \}
             if (has_key(song, 'sections'))
                 for section in song.sections
-                    if (type(section) ==# v:t_list)
+                    if (type(section) ==# type([]))
                         let start_time = section[0]
                         let description = section[1]
                         let indexed.by_lines[line_num] = {
@@ -174,7 +174,7 @@ function! s:indexAnnotation(annotation) abort
                                     \ 'description': description,
                                     \ 'start_time': start_time
                                     \}
-                    elseif (type(section) ==# v:t_number)
+                    elseif (type(section) ==# type(0))
                         let start_time = section
                         let indexed.by_lines[line_num] = {
                                     \ 'type': 'section',
@@ -267,13 +267,13 @@ function! s:renderInterface(indexed_annotation, state) abort
     endfunction
     function internal.shouldRenderPlayPauseIndicator(line_num)
         if has_key(self.state, 'line_selected')
-            if type(self.state.line_selected) ==# v:t_list
+            if type(self.state.line_selected) ==# type([])
                 if a:line_num ==# self.state.line_selected[0]
                     return 1
                 else
                     return 0
                 endif
-            elseif type(self.state.line_selected) ==# v:t_number
+            elseif type(self.state.line_selected) ==# type(0)
                 if a:line_num ==# self.state.line_selected
                     return 1
                 else
@@ -566,7 +566,7 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
         "For now, reload the playlist if either:
         "1. Playing normally, but on loop
         "2. Playing linewise, regardless of any subsequent loop toggle
-        let linewise_mode = type(self.state.line_selected) ==# v:t_list
+        let linewise_mode = type(self.state.line_selected) ==# type([])
         if self.state.loop ==# 1 || linewise_mode
             if linewise_mode
                 call self.interpretLinesToPlay(self.state.line_selected[0], self.state.line_selected[1], 1)
