@@ -1,10 +1,64 @@
-*vlcdrill.txt*  Plugin for interfacing with VLC
+vlcdrill.txt  Plugin for interfacing with VLC
 
 Author:  Xiao Di Li <https://xiaodi.li/>
 License: MIT
 
-This plugin is only available if 'compatible' is not set.
+INTRODUCTION                            *vlcdrill*
 
-INTRODUCTION                                    *vlcdrill*
+This plugin allows VLC streams to be defined in JSON format
+'annotation' files and then exposes an interface to control
+their playback.
 
-MAPPINGS                                        *vlc-mappings*
+ANNOTATION                              *vlcdrill-annotation*
+
+The annotation JSON file consists of a 'playlist' key, holding
+an array of <Stream>s:
+
+  {
+    "playlist": [
+      <Stream>...
+    ]
+  }
+
+Where `<Stream>` can be:
+
+* `stream <string>` containing the path for the local file
+or stream location of the song
+* `{stream <string>, title <string>?, section <Section>?}` 
+
+Where `<Section>` can be:
+
+* `start_time <int>`, containing the start time of the section
+* `[start_time <int>, description <string>]`
+
+See the `example_annotations/` directory for more examples
+(The `aimee_mann_youtube.json` is loaded by default, if one
+isn't set in `g:vlcdrill#annotation#path`)
+
+MAPPINGS                                *vlcdrill-mappings*
+
+                                        *vlcdrill-:VlcDrillShow*
+:VlcDrillShow
+
+Opens the VLCDrill buffer
+
+                                        *vlcdrill-:VlcDrillLoadAnnotation*
+:VlcDrillLoadAnnotation
+
+Brings up a prompt to load or reload an annotation file
+
+The following mappings are available within the VlcDrill buffer:
+
+<Up>                       volume up
+<Down>                     volume down
+<Space>                    toggle play/pause
+<Left>                     previous VLC playlist item in selection
+<Right>                    next VLC playlist item in selection
+p (normal mode)            play section under cursor till end of its stream
+p (linewise visual mode)   loop highlighted section(s)
+ri                         increase rate
+rd                         decrease rate
+rn                         normal rate
+u                          show seconds played of stream
+o                          toggle loop
+q                          close VlcDrill buffer

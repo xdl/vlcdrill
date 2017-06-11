@@ -89,3 +89,7 @@ Bindings and vlc/annotation paths can be customised in your `vimrc`:
     let g:vlcdrill#annotation#path = '/path/to/your/annotation.json'
     nnoremap <leader>vds :VlcDrillShow<CR>
     nnoremap <leader>vdl :VlcDrillLoadAnnotation<CR>
+
+## Compatibility
+
+Have tested it on MacOS and Ubuntu for Vim 7.4.x and 8. Unlikely to work on Windows because of the unix commands that are used.
