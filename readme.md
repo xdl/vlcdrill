@@ -92,4 +92,4 @@ Bindings and vlc/annotation paths can be customised in your `vimrc`:
 
 ## Compatibility
 
-Have tested it on MacOS and Ubuntu for Vim 7.4.x and 8. Unlikely to work on Windows because of the unix commands that are used.
+Have tested it on MacOS and Ubuntu for Vim 8. Unlikely to work on Windows because of the unix commands that are used.
