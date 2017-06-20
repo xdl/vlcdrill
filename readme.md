@@ -1,6 +1,6 @@
 # VLC Drill
 
-Vim interface for controlling VLC over telnet using the `rc` interface. (Bit more background available [here](https://xiaodi.li/projects/vlcdrill)
+Vim interface for controlling VLC over telnet using the `rc` interface. (Bit more background available [here](https://xiaodi.li/projects/vlcdrill))
 
 ![Preview](assets/preview.gif)
 
