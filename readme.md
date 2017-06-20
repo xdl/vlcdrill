@@ -1,6 +1,6 @@
 # VLC Drill
 
-Vim interface for controlling VLC over telnet using the `rc` interface.
+Vim interface for controlling VLC over telnet using the `rc` interface. (Bit more background available [here](https://xiaodi.li/projects/vlcdrill)
 
 ![Preview](assets/preview.gif)
 
@@ -92,4 +92,14 @@ Bindings and vlc/annotation paths can be customised in your `vimrc`:
 
 ## Compatibility
 
-Have tested it on MacOS and Ubuntu for Vim 8. Unlikely to work on Windows because of the unix commands that are used.
+Have tested it on MacOS and Ubuntu. Should work on most unix-y systems with the following commands available:
+
+* `echo`
+* `lsof`
+* `nc`
+
+Vim 8 is needed for some of the newer functions (e.g. `closure` and `json_decode`).
+
+## Known Issues
+
+Some YouTube links don't seem to be recognised on the some of the earlier versions of VLC - try updating VLC if that's the case.
