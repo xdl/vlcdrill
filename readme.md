@@ -1,6 +1,6 @@
 # VLC Drill
 
-Vim interface for controlling VLC over telnet using the `rc` interface. (Bit more background available [here](https://xiaodi.li/projects/vlcdrill))
+Vim interface for controlling VLC over telnet using the `rc` interface. (Wrote a bit more on the motivation behind the plugin [here](https://xiaodi.li/projects/vlcdrill))
 
 ![Preview](assets/preview.gif)
 
@@ -63,7 +63,7 @@ Where `<Section>` can be:
 * `start_time <int>`, containing the start time of the section
 * `[start_time <int>, description <string>]`
 
-See the `example_annotations/` directory for more examples (The `aimee_mann_youtube.json` is loaded by default, if one isn't set in `g:vlcdrill#annotation#path`)
+See the `example_annotations/` directory for more examples (The `aimee_mann_youtube.json` is loaded by default, if one isn't set in `g:vlcdrill#annotation#path`).
 
 ## Bindings
 
