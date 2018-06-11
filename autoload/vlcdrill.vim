@@ -10,6 +10,9 @@ let s:DEBUG_FLAG = 0
 if !exists("g:vlcdrill#bin#path")
     let g:vlcdrill#bin#path = 'vlc'
 endif
+if !exists("g:vlcdrill#ResolveWithYouTubeDl")
+    let g:vlcdrill#ResolveWithYouTubeDl = 1
+endif
 let s:current_directory = expand("<sfile>:p:h")
 if !exists("g:vlcdrill#annotation#path")
     let g:vlcdrill#annotation#path = s:current_directory . '/../example_annotations/aimee_mann_youtube.json'
@@ -150,12 +153,12 @@ function! s:indexAnnotation(annotation) abort
         if type(song) ==# v:t_string
             let indexed.by_song_id[song_id] = {
                         \ 'title': song,
-                        \ 'stream': song
+                        \ 'stream': s:ResolveWithYouTubeDl(song)
                         \}
         elseif type(song) ==# v:t_dict
             let indexed.by_song_id[song_id] = {
                         \ 'title': song.title,
-                        \ 'stream': song.stream
+                        \ 'stream': s:ResolveWithYouTubeDl(song.stream)
                         \}
             if (has_key(song, 'sections'))
                 for section in song.sections
@@ -404,14 +407,29 @@ function! s:IsLinewiseSelection(currently_visual)
     endif
 endfunction
 
-function! s:ExecuteSilently(command, debug_flag)
-    if a:debug_flag ==# 1
+function! s:ExecuteSilently(command)
+    if s:DEBUG_FLAG ==# 1
         echom a:command
     endif
     return system(a:command)
 endfunction
 
-function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_flag) abort
+let s:YouTubeDlCache = {}
+function! s:ResolveWithYouTubeDl(stream) abort
+    if g:vlcdrill#ResolveWithYouTubeDl ==# 1 && stridx(a:stream, "youtube.com/watch?v=") !=# -1
+        if (!has_key(s:YouTubeDlCache, a:stream))
+            "https://vi.stackexchange.com/questions/2867/how-do-you-chomp-a-string-in-vim
+            let audio_url = system('youtube-dl --get-url ' . a:stream . ' | grep mime=audio')[:-2]
+            let s:YouTubeDlCache[a:stream] = audio_url
+        endif
+            return get(s:YouTubeDlCache, a:stream)
+        endif
+    else
+        return a:stream
+    endif
+endfunction
+
+function! s:DrillInterface(telnet_port, telnet_password, log_location) abort
 
     let annotation_loaded = 0
     let indexed_annotation = {} "to be set on loadAnnotation
@@ -464,20 +482,20 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
                         let next_target = indexed_annotation.by_lines[next_line]
                         if (next_target.song_id ==# target.song_id) "bounded by a subsequent section
                             let finish_time = next_target.start_time
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :stop-time=' . finish_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('clear'))
+                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :stop-time=' . finish_time . ' :rate=' . string(state.rate/10.0)))
+                            call s:ExecuteSilently(tcb.build('loop on'))
                             let state.loop = 1
                         else "different song next
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('clear'))
+                            call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)))
+                            call s:ExecuteSilently(tcb.build('loop on'))
                             let state.loop = 1
                         endif
                     else "last section/song in the playlist
-                        call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                        call s:ExecuteSilently(tcb.build('clear'))
+                        call s:ExecuteSilently(tcb.build('add ' . song_stream . ' :start-time=' . start_time . ' :rate=' . string(state.rate/10.0)))
+                        call s:ExecuteSilently(tcb.build('loop on'))
                         let state.loop = 1
                     endif
                 else "looping multiple sections/songs
@@ -502,29 +520,29 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
                         if (next_target.song_id ==# target.song_id) "bounded by a subsequent section
                             let finish_time = next_target.start_time
                             let song_stream_commands[-1] = song_stream_commands[-1] . ' :stop-time=' . finish_time
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('clear'))
+                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)))
                             for stream_command in song_stream_commands[1:]
-                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)))
                             endfor
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('loop on'))
                             let state.loop = 1
                         else "different song next
-                            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('clear'))
+                            call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)))
                             for stream_command in song_stream_commands[1:]
-                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command), a:debug_flag)
+                                call s:ExecuteSilently(tcb.build('enqueue ' . stream_command))
                             endfor
-                            call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('loop on'))
                             let state.loop = 1
                         endif
                     else "last section/song in the playlist
-                        call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                        call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                        call s:ExecuteSilently(tcb.build('clear'))
+                        call s:ExecuteSilently(tcb.build('add ' . song_stream_commands[0] . ' :rate=' . string(state.rate/10.0)))
                         for stream_command in song_stream_commands[1:]
-                            call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                            call s:ExecuteSilently(tcb.build('enqueue ' . stream_command . ' :rate=' . string(state.rate/10.0)))
                         endfor
-                        call s:ExecuteSilently(tcb.build('loop on'), a:debug_flag)
+                        call s:ExecuteSilently(tcb.build('loop on'))
                         let state.loop = 1
                     endif
                 endif
@@ -538,17 +556,17 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
                     let target = indexed_annotation.by_lines[a:first_line]
                     let song_stream = indexed_annotation.by_song_id[target.song_id].stream
                     let start_time = target.start_time
-                    call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-                    call s:ExecuteSilently(tcb.build('add ' . song_stream . ' ' . ':start-time=' . start_time . ' :rate=' . string(state.rate/10.0)), a:debug_flag)
+                    call s:ExecuteSilently(tcb.build('clear'))
+                    call s:ExecuteSilently(tcb.build('add ' . song_stream . ' ' . ':start-time=' . start_time . ' :rate=' . string(state.rate/10.0)))
                     if state.loop ==# 1
-                        call s:ExecuteSilently(tcb.build('loop off'), a:debug_flag)
+                        call s:ExecuteSilently(tcb.build('loop off'))
                         let state.loop = 0
                     endif
                     let state.linewise_mode = 0
                 endif
             endif
         endif
-        call s:ExecuteSilently(tcb.build('play'), a:debug_flag) "makes sure play status is properly set
+        call s:ExecuteSilently(tcb.build('play')) "makes sure play status is properly set
         call s:renderInterface(indexed_annotation, self.getState())
     endfunction
     function internal.handleRateChange() closure
@@ -564,7 +582,7 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
                 call self.interpretLinesToPlay(state.line_selected, state.line_selected, 0)
             endif
         else
-            call s:ExecuteSilently(tcb.build('rate ' . string(state.rate/10.0)), a:debug_flag)
+            call s:ExecuteSilently(tcb.build('rate ' . string(state.rate/10.0)))
         endif
         call s:renderInterface(indexed_annotation, self.getState())
     endfunction
@@ -577,9 +595,9 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
         if s:isTelnetServerStarted(a:telnet_port) ==# 0
             call s:startTelnetServer(g:vlcdrill#bin#path, a:telnet_port, a:telnet_password, a:log_location)
         else
-            call s:ExecuteSilently(tcb.build('clear'), a:debug_flag)
-            call s:ExecuteSilently(tcb.build('loop off'), a:debug_flag)
-            call s:ExecuteSilently(tcb.build('rate 1'), a:debug_flag)
+            call s:ExecuteSilently(tcb.build('clear'))
+            call s:ExecuteSilently(tcb.build('loop off'))
+            call s:ExecuteSilently(tcb.build('rate 1'))
         endif
         let annotation_loaded = 1
     endfunction
@@ -590,7 +608,7 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
         call internal.interpretLinesToPlay(a:first_line, a:last_line, a:currently_visual)
     endfunction
     function drill.pause() closure
-        call s:ExecuteSilently(tcb.build('pause'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('pause'))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.toggleLoop() closure
@@ -601,15 +619,15 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
             let state.loop = 0
             let command = ' off'
         endif
-        call s:ExecuteSilently(tcb.build('loop ' . command), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('loop ' . command))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.volumeUp() closure
-        call s:ExecuteSilently(tcb.build('volup'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('volup'))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.volumeDown() closure
-        call s:ExecuteSilently(tcb.build('voldown'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('voldown'))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.debug() closure
@@ -640,15 +658,15 @@ function! s:DrillInterface(telnet_port, telnet_password, log_location, debug_fla
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.cleanup() closure
-        call s:ExecuteSilently(tcb.build('shutdown'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('shutdown'))
         silent execute "!rm " . a:log_location
     endfunction
     function drill.prev() closure
-        call s:ExecuteSilently(tcb.build('prev'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('prev'))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     function drill.next() closure
-        call s:ExecuteSilently(tcb.build('next'), a:debug_flag)
+        call s:ExecuteSilently(tcb.build('next'))
         call s:renderInterface(indexed_annotation, internal.getState())
     endfunction
     return drill
@@ -672,7 +690,7 @@ function! s:openInterface() abort
     endif
 endfunction
 
-let s:drill = s:DrillInterface(s:TELNET_PORT, s:TELNET_PASSWORD, s:LOG_LOCATION, s:DEBUG_FLAG)
+let s:drill = s:DrillInterface(s:TELNET_PORT, s:TELNET_PASSWORD, s:LOG_LOCATION)
 
 "range argument stops this being called multiple times
 function! s:VlcDrillPlay() abort range

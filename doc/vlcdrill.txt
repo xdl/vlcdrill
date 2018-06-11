@@ -62,3 +62,22 @@ rn                         normal rate
 u                          show seconds played of stream
 o                          toggle loop
 q                          close VlcDrill buffer
+
+-------------------------------------------------------------------------------
+Descriptions of default values:~
+
+                                        *g:vlcdrill#bin#path*
+
+Path of VLC executable.
+Defaults to 'vlc'
+
+                                        *g:vlcdrill#ResolveWihYouTubeDl*
+
+Whether or not to detect YouTube pages given in streams and to fetch the video stream URL of it using youtube-dl (https://rg3.github.io/youtube-dl/). A plain YouTube link will play fine (e.g. https://www.youtube.com/watch?v=QgRBYn_m9aE) but start and end times cannot be specified as VLC interprets the link as a playlist.
+youtube-dl must be available on the PATH.
+Defaults to 1
+
+                                        *g:vlcdrill#annotation#path*
+
+Location of annotation file
+Defaults to '/../example_notations/aimee_mann_youtube.json'

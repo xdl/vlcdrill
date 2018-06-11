@@ -86,17 +86,19 @@ See the `example_annotations/` directory for more examples (The `aimee_mann_yout
 Bindings and vlc/annotation paths can be customised in your `vimrc`:
 
     let g:vlcdrill#bin#path = '/Applications/VLC.app/Contents/MacOS/VLC' "defaults to 'vlc'
-    let g:vlcdrill#annotation#path = '/path/to/your/annotation.json'
+    let g:vlcdrill#annotation#path = '/path/to/your/annotation.json' # defaults to '/../example_annotations/aimee_mann_youtube.json'
+    let g:vlcdrill#resolveWithYoutubeDl = 0 # defaults to 1
     nnoremap <leader>vds :VlcDrillShow<CR>
     nnoremap <leader>vdl :VlcDrillLoadAnnotation<CR>
 
 ## Compatibility
 
-Have tested it on MacOS and Ubuntu. Should work on most unix-y systems with the following commands available:
+Have tested it on MacOS (El Capitan → High Sierra), Ubuntu (14.04, 16.04) with VLC 3.0.3. Should work on most unix-y systems with the following commands available:
 
 * `echo`
 * `lsof`
 * `nc`
+* `youtube-dl` (optional)
 
 Vim 8 is needed for some of the newer functions (e.g. `closure` and `json_decode`).
 
