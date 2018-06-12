@@ -72,6 +72,7 @@ function! s:setDrillBufferSettings() abort
     "syntax
     let b:current_syntax = 'vlcdrill'
     syntax match VlcDrillHeading '^------.*------$'
+    syntax match VlcDrillHeading '^======.*======$'
     syntax match VlcDrillPlaying '\v^▌.*$'
     syntax match VlcDrillHelpKeyAlpha '\v^\zs[a-z][a-z]?\ze(\s|:)'
     syntax match VlcDrillHelpKeyNonAlpha '\v^\zs\<\w*\>\ze:'
@@ -83,9 +84,9 @@ function! s:setDrillBufferSettings() abort
     "mappings
     
     "rate
-    nnoremap <script> <silent> <buffer> ri :call <SID>VlcDrillRateIncrease()<CR>
-    nnoremap <script> <silent> <buffer> rd :call <SID>VlcDrillRateDecrease()<CR>
-    nnoremap <script> <silent> <buffer> rn :call <SID>VlcDrillRateNormal()<CR>
+    nnoremap <script> <silent> <buffer> f :call <SID>VlcDrillRateIncrease()<CR>
+    nnoremap <script> <silent> <buffer> s :call <SID>VlcDrillRateDecrease()<CR>
+    nnoremap <script> <silent> <buffer> n :call <SID>VlcDrillRateNormal()<CR>
 
     "quit
     nnoremap <script> <silent> <buffer> q :call <SID>VlcDrillClose()<CR>
@@ -343,7 +344,7 @@ function! s:renderInterface(indexed_annotation, state) abort
 
     "divider
     call add(ui, "")
-    call add(ui, "------Status------")
+    call add(ui, "=========== STATUS ===========")
 
     "state
     if has_key(a:state, 'play_state')
@@ -373,20 +374,32 @@ function! s:renderInterface(indexed_annotation, state) abort
     "call add(ui, "▶/⏸ : indicates current")
 
     call add(ui, "")
-    call add(ui, "------Bindings------")
+    call add(ui, "========== BINDINGS ==========")
 
-    call add(ui, "<Up>: volume up")
-    call add(ui, "<Down>: volume down")
+    call add(ui, "")
+    call add(ui, "------ Playback Control ------")
+
+    call add(ui, "p (normal mode): play section under cursor till end of its stream")
+    call add(ui, "p (linewise visual mode): loop highlighted section(s)")
     call add(ui, "<Space>: toggle play/pause")
     call add(ui, "<Left>: previous VLC playlist item in selection")
     call add(ui, "<Right>: next VLC playlist item in selection")
-    call add(ui, "p (normal mode): play section under cursor till end of its stream")
-    call add(ui, "p (linewise visual mode): loop highlighted section(s)")
-    call add(ui, "ri: increase rate")
-    call add(ui, "rd: decrease rate")
-    call add(ui, "rn: normal rate")
+    call add(ui, "o: toggle looping of selection")
+
+    call add(ui, "")
+    call add(ui, "----------- Tempo ------------")
+    call add(ui, "s: slower")
+    call add(ui, "f: faster")
+    call add(ui, "n: normal speed")
+
+    call add(ui, "")
+    call add(ui, "----------- Volume -----------")
+    call add(ui, "<Up>: volume up")
+    call add(ui, "<Down>: volume down")
+
+    call add(ui, "")
+    call add(ui, "----------- Other ------------")
     call add(ui, "u: show seconds played of stream")
-    call add(ui, "o: toggle loop")
     call add(ui, "q: close VlcDrill buffer")
 
     "paint to buffer
