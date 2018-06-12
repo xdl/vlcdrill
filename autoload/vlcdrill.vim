@@ -422,8 +422,7 @@ function! s:ResolveWithYouTubeDl(stream) abort
             let audio_url = system('youtube-dl --get-url ' . a:stream . ' | grep mime=audio')[:-2]
             let s:YouTubeDlCache[a:stream] = audio_url
         endif
-            return get(s:YouTubeDlCache, a:stream)
-        endif
+        return get(s:YouTubeDlCache, a:stream)
     else
         return a:stream
     endif
@@ -793,7 +792,7 @@ function! vlcdrill#VlcDrillShow() abort
 endfunction
 
 function! vlcdrill#VlcDrillLoadAnnotation() abort
-    let annotation_path = input("Enter path for annotation JSON (leave empty to reload current annotation): ", "", "file")
+    let annotation_path = input("Enter path for annotation JSON (leave empty to load " . g:vlcdrill#annotation#path  . "): ", "", "file")
     if strlen(annotation_path) ==# 0
         call s:drill.loadAnnotation(expand(g:vlcdrill#annotation#path))
     else
@@ -801,5 +800,11 @@ function! vlcdrill#VlcDrillLoadAnnotation() abort
         call s:VlcDrillHandleAnnotation()
         call s:drill.loadAnnotation(expand(g:vlcdrill#annotation#path))
     endif
+    call s:drill.renderInterface()
+endfunction
+
+function! vlcdrill#VlcDrillLoadCurrentBuffer() abort
+    let g:vlcdrill#annotation#path = expand('%:p')
+    call s:drill.loadAnnotation(g:vlcdrill#annotation#path)
     call s:drill.renderInterface()
 endfunction

@@ -90,6 +90,9 @@ Bindings and vlc/annotation paths can be customised in your `vimrc`:
     let g:vlcdrill#resolveWithYoutubeDl = 0 # defaults to 1
     nnoremap <leader>vds :VlcDrillShow<CR>
     nnoremap <leader>vdl :VlcDrillLoadAnnotation<CR>
+    nnoremap <leader>vdb :VlcDrillLoadCurrentBuffer<CR>
+
+See help for detailed descriptions.
 
 ## Compatibility
 

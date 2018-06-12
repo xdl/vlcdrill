@@ -5,3 +5,4 @@ let g:loaded_vlcdrill = 1
 
 command! -nargs=0 VlcDrillShow call vlcdrill#VlcDrillShow()
 command! -nargs=0 VlcDrillLoadAnnotation call vlcdrill#VlcDrillLoadAnnotation()
+command! -nargs=0 VlcDrillLoadCurrentBuffer call vlcdrill#VlcDrillLoadCurrentBuffer()

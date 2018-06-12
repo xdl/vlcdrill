@@ -3,6 +3,7 @@ vlcdrill.txt  Plugin for interfacing with VLC
 Author:  Xiao Di Li <https://xiaodi.li/>
 License: MIT
 
+-------------------------------------------------------------------------------
 INTRODUCTION                            *vlcdrill*
 
 This plugin allows VLC streams to be defined in JSON format
@@ -35,7 +36,9 @@ See the `example_annotations/` directory for more examples
 (The `aimee_mann_youtube.json` is loaded by default, if one
 isn't set in `g:vlcdrill#annotation#path`)
 
-MAPPINGS                                *vlcdrill-mappings*
+-------------------------------------------------------------------------------
+COMMANDS
+
 
                                         *vlcdrill-:VlcDrillShow*
 :VlcDrillShow
@@ -46,6 +49,15 @@ Opens the VLCDrill buffer
 :VlcDrillLoadAnnotation
 
 Brings up a prompt to load or reload an annotation file
+
+                                        *vlcdrill-:VlcDrillLoadCurrentBuffer*
+:VlcDrillLoadCurrentBuffer
+
+Loads the current buffer (where this command was invoked) as an annotation file 
+
+
+-------------------------------------------------------------------------------
+MAPPINGS                                *vlcdrill-mappings*
 
 The following mappings are available within the VlcDrill buffer:
 
@@ -64,7 +76,7 @@ o                          toggle loop
 q                          close VlcDrill buffer
 
 -------------------------------------------------------------------------------
-Descriptions of default values:~
+DESCRIPTION OF DEFAULT VALUES
 
                                         *g:vlcdrill#bin#path*
 
