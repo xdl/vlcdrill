@@ -1,8 +1,16 @@
 # VLC Drill
 
-Vim interface for controlling VLC over telnet using the `rc` interface. (Wrote a bit more on the motivation behind the plugin [here](https://xiaodi.li/projects/vlcdrill))
+Vim interface for controlling VLC over telnet using the `rc` interface.
+
+NOTE: This plugin is now unmaintained.
+
+## Background
+
+When learning how to play a song by ear, it's useful have sections of it on repeat and/or slowed down. It can be fiddly to keep scrubbing back or to set up a loop for a certain passage, so I hacked together some tooling around VLC as a plugin for my text editor that helps.
 
 ![Preview](assets/preview.gif)
+
+After 'annotating' the song (i.e. noting down when the verses, choruses, solos etc. starts), the section(s) of interest can then be visually selected and looped over with a few keystrokes. The annotation lives in a text file that can be edited and reloaded in the same session, and I've found that taking notes and controlling the song playback through one program pretty neat. At a pinch, it also comes in handy for ad-hoc YouTube playlists.
 
 ## Installation
 
@@ -121,3 +129,9 @@ See help for detailed descriptions.
 ## Known Issues
 
 Some YouTube links don't seem to be recognised on the some of the earlier versions of VLC - try updating VLC if that's the case.
+
+## Useful Links
+
+* Accomplishing [the same thing](https://jodiesmusiccorner.wordpress.com/2014/04/02/loop-a-section-of-a-song-and-change-playback-speed-in-vlc-media-player/comment-page-1/) with VLC's GUI
+* Steve Losh's [Learn Vimscript the Hard Way](http://learnvimscriptthehardway.stevelosh.com/), particularly the plugin material from Chapter 41 onward
+* [Gundo.vim](https://github.com/sjl/gundo.vim/blob/master/autoload/gundo.vim#L194)'s source code; good example of how to manage the buffer where the interface is rendered
